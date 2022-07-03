@@ -1,0 +1,44 @@
+import 'package:flutter/material.dart';
+
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:new_project/models/teacher_model.dart';
+import 'package:path_provider/path_provider.dart';
+
+class TeacherStorage {
+  List<Teacher> teacherFromJson(String str) =>
+      List<Teacher>.from(json.decode(str).map((x) => Teacher.fromJson(x)));
+
+  String teacherToJson(List<Teacher> data) =>
+      json.encode(List<dynamic>.from(data.map((x) => x.toJson)));
+
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+    return directory.path;
+  }
+
+  Future<File> get _localFile async {
+    final path = await _localPath;
+    return File('$path/ogretmenler.json');
+  }
+
+  Future<List<Teacher>?> readTeachers() async {
+    try {
+      final file = await _localFile;
+      final contents = await file.readAsString();
+
+      return teacherFromJson(contents);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<File> writeTeachers(List<Teacher> teachers) async {
+    final file = await _localFile;
+
+    String teacherAsString = teacherToJson(teachers);
+    return file.writeAsString(teacherAsString);
+  }
+}
